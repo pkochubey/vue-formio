@@ -48,7 +48,10 @@ export default class extends Vue {
   }
 
   @Watch('submission')
-  submissionhange(value: object) {
+  submissionhange(value: object, done: boolean) {
+    if (done) {
+      return
+    }
     if (this.formio) {
       this.formio.submission = value;
     }
