@@ -6,9 +6,12 @@ import Components from 'formiojs/components/Components';
 Components.setComponents(AllComponents);
 import Form from 'formiojs/Form';
 import Formio from 'formiojs/Formio';
+import FormioUtils from 'formiojs/utils';
 
 @Component
 export default class extends Vue {
+  loaded: boolean;
+
   formio?: Formio;
 
   @Prop()
@@ -85,6 +88,61 @@ export default class extends Vue {
     }
   }
 
+  enumerateObject(obj, from, to) {
+    let dataFrom = null;
+    let dataTo = null;
+    for (const key of Object.keys(obj)) {
+        if(from === key){
+            dataFrom = obj[key];
+        }
+        if(to === key){
+            dataTo = obj[key];
+        }
+        if(dataFrom != null && dataTo != null){
+            this.mergeObject(dataFrom, dataTo);
+            break;
+        }
+        if(typeof obj[key] === 'object'){
+            this.enumerateObject(obj[key], from, to);
+        }
+    }
+    if(dataFrom !== null && dataTo === null) {
+        obj[to] = dataFrom
+    }
+  }
+
+  mergeObject(from, to){
+    for (const key of Object.keys(from)) {
+        if(key === 'data'){
+            if(from && to && from.data && to.data){
+                this.mergeObject(from.data, to.data);
+            }
+        }else{
+            to[key] = from[key];
+        }
+    }
+  }
+
+  enumerateComponents(components) {
+    if(!components){
+      return
+    }
+
+    FormioUtils.eachComponent(components, (item) => {
+        if (item.component.tags && item.component.tags.length > 0) {
+            for (let i of item.component.tags) {
+                if (i.indexOf("copy_") > -1) {
+                    this.enumerateObject(this.submission, i.replace("copy_", ""), item.key)
+                }
+            }
+        }
+
+        if (item.components) {
+            this.enumerateComponents(item.components);
+        }
+    })
+  }
+
   initializeForm(): Promise<any> {
     return new Promise((resolve, reject) => {
       if (this.src) {
@@ -130,6 +188,10 @@ export default class extends Vue {
     if (!this.formio) {
       return;
     }
+
+    this.enumerateComponents(this.formio.components)
+    this.submission = JSON.parse(JSON.stringify(this.submission))
+
     if (this.submission) {
       this.formio.submission = this.submission;
     }

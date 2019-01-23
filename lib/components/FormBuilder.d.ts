@@ -1,5 +1,5 @@
 import Vue from 'vue';
-export default class extends Vue {
+export default class  extends Vue {
     builder?: any;
     builderReady?: Promise<any>;
     form?: any;
