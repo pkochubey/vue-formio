@@ -1,7 +1,6 @@
 import Vue from 'vue';
 import Formio from 'formiojs/Formio';
 export default class  extends Vue {
-    loaded: boolean;
     formio?: Formio;
     src?: string;
     url?: string;

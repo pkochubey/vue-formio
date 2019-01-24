@@ -10,8 +10,6 @@ import FormioUtils from 'formiojs/utils';
 
 @Component
 export default class extends Vue {
-  loaded: boolean;
-
   formio?: Formio;
 
   @Prop()
@@ -129,7 +127,7 @@ export default class extends Vue {
     }
 
     FormioUtils.eachComponent(components, (item) => {
-        if (item.component.tags && item.component.tags.length > 0) {
+        if (item && item.component && item.component.tags && item.component.tags.length > 0) {
             for (let i of item.component.tags) {
                 if (i.indexOf("copy_") > -1) {
                     this.enumerateObject(this.submission, i.replace("copy_", ""), item.key)
@@ -137,7 +135,7 @@ export default class extends Vue {
             }
         }
 
-        if (item.components) {
+        if (item && item.components) {
             this.enumerateComponents(item.components);
         }
     })
